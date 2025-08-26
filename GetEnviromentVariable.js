@@ -1,6 +1,3 @@
-// envVarDialog.js
-
-
 let _envVarBusy = false; // shared guard
 
 function isEnvVarDialogEnabled() {
@@ -13,9 +10,8 @@ function isEnvVarDialogEnabled() {
  * @param {string} schemaName
  */
 async function showEnvVarDialog(executionContext, schemaName) {
-  // 1) Hard guard against double-clicks
+  // guard against double-clicks
   if (_envVarBusy) {
-    // optional: show a toast/alert instead of silently ignoring
     return Xrm.Navigation.openAlertDialog({ text: "Already running — please wait." });
   }
   _envVarBusy = true;
@@ -24,7 +20,6 @@ async function showEnvVarDialog(executionContext, schemaName) {
 
     const formContext = executionContext?.getFormContext?.();
 
-    // --- your existing retrieval logic (unchanged) ---
     const defQuery = "?$select=environmentvariabledefinitionid,schemaname,defaultvalue" +
                      "&$filter=schemaname eq '" + encodeURIComponent(schemaName) + "'";
     const defResult = await Xrm.WebApi.retrieveMultipleRecords("environmentvariabledefinition", defQuery);
@@ -50,11 +45,11 @@ async function showEnvVarDialog(executionContext, schemaName) {
     Xrm.Utility.closeProgressIndicator();
     _envVarBusy = false;
 
-    // Refresh ribbon so the button re-enables if you're using an enable rule
+    // Refresh ribbon
     try {
       const formContext = executionContext?.getFormContext?.();
       if (formContext?.ui?.refreshRibbon) formContext.ui.refreshRibbon(true);
-      else if (Xrm?.Page?.ui?.refreshRibbon) Xrm.Page.ui.refreshRibbon(); // legacy fallback
+      else if (Xrm?.Page?.ui?.refreshRibbon) Xrm.Page.ui.refreshRibbon();
     } catch(_) {}
   }
 }
@@ -62,4 +57,5 @@ async function showEnvVarDialog(executionContext, schemaName) {
 // Expose for ribbon
 window.showEnvVarDialog = showEnvVarDialog;
 window.isEnvVarDialogEnabled = isEnvVarDialogEnabled;
+
 
